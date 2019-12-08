@@ -1,0 +1,116 @@
+function pk=teorico(a,k)
+    if a==1
+        pk=1/(k+1);
+    else
+        pk=(a^k)*(1-a)/(1-a^(k+1));
+    end
+end
+
+function [Pbpromedio, bloqueo] = mm1k(tea, tds)
+usuarios = numel(tea);
+reloj=cumsum(tea);
+
+inicio=zeros(1,usuarios);
+salida=zeros(1,usuarios);
+bloqueo=zeros(1,usuarios);
+
+inicio(1)=reloj(1);
+salida(1)=inicio(1)+tds(1);
+ib=salida(1);
+
+for i=1: usuarios-1
+    if ib<=reloj(i+1)
+        inicio(i+1)=reloj(i+1);
+        salida(i+1)=inicio(i+1)+tds(i+1);
+        ib=salida(i+1);
+    else
+        inicio(i+1)=0;
+        salida(i+1)=0;
+    end
+end
+for i=1: usuarios
+    if inicio(i)==0 & salida(i)==0
+        bloqueo(i)=1;
+    else
+        bloqueo(i)=0;
+    end
+end
+Pbpromedio=sum(bloqueo)/usuarios;
+end
+
+function [Pbpromedio, bloqueo] = mm1k_gen(tea, tds, k)
+if k == 1
+    usuarios = numel(tea);
+    reloj=cumsum(tea);
+
+    inicio=zeros(1,usuarios);
+    salida=zeros(1,usuarios);
+    bloqueo=zeros(1,usuarios);
+
+    inicio(1)=reloj(1);
+    salida(1)=inicio(1)+tds(1);
+    ib=salida(1);
+
+    for i=1: usuarios-1
+        if ib<=reloj(i+1)
+            inicio(i+1)=reloj(i+1);
+            salida(i+1)=inicio(i+1)+tds(i+1);
+            ib=salida(i+1);
+        else
+            inicio(i+1)=0;
+            salida(i+1)=0;
+        end
+    end
+    for i=1: usuarios
+        if inicio(i)==0 & salida(i)==0
+            bloqueo(i)=1;
+        else
+            bloqueo(i)=0;
+        end
+    end
+    Pbpromedio=sum(bloqueo)/usuarios;
+    else
+    usuarios = numel(tea);
+    reloj=cumsum(tea);
+
+    inicio=zeros(1,usuarios);
+    salida=zeros(1,usuarios);
+    bloqueo=zeros(1,usuarios);
+    c=zeros(1,usuarios);
+    verificador=zeros(1,k);
+
+    inicio(1)=reloj(1);
+    salida(1)=inicio(1)+tds(1);
+    bloqueo(1)=0;
+
+    orden=sort(salida);
+    cantidad=numel(orden);
+    verificador=orden(cantidad-k+1:cantidad);
+
+    for i=1: usuarios-1
+        if salida(i)<=reloj(i+1) & salida(i)>0
+            inicio(i+1)=reloj(i+1);
+            salida(i+1)=inicio(i+1)+tds(i+1);
+            bloqueo(i+1)=0;
+        else
+            comparador=verificador<reloj(i+1);
+            comparar=sum(comparador);
+            c(i)=comparar;
+            if comparar==0
+                inicio(i+1)=0;
+                salida(i+1)=0;
+                bloqueo(i+1)=1;
+            else
+                inicio(i+1)=max(verificador);
+                salida(i+1)=inicio(i+1)+tds(i+1);
+                bloqueo(i+1)=0;
+            end
+        end
+        i;
+        orden=sort(salida);
+        cantidad=numel(orden);
+        verificador=orden(cantidad-k+1:cantidad);
+    end
+    Pbpromedio=sum(bloqueo)/usuarios;
+end
+end
